@@ -1,12 +1,13 @@
-import { useUser } from "@clerk/nextjs/app-beta/client";
+import { useUser } from "@clerk/nextjs";
 import Head from "next/head";
 import { UserButton } from "@clerk/nextjs";
 
 import { api } from "~/utils/api";
 
 export default function Home() {
-  const hello = api.post.hello.useQuery({ text: "from tRPC" });
+  const user = useUser();
 
+  const { data } = api.post.getAll.useQuery();
 
   return (
     <>
@@ -16,10 +17,12 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <header>
-				<UserButton afterSignOutUrl="/"/>
-			</header>
+        <UserButton afterSignOutUrl="/" />
+      </header>
       <main>
-        
+        <div>
+          {data?.map((post) => <div key={post.id}>{post.content}</div>)}
+        </div>
       </main>
     </>
   );
