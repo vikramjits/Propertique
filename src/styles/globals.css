@@ -4,5 +4,5 @@
 
 
 body{
-    @apply bg-black text-slate-400;
+    @apply bg-black text-slate-400 font-sans;
 }

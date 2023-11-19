@@ -10,23 +10,38 @@ import type { RouterOutputs } from "~/utils/api";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { LoadingPage } from "~/components/loading";
+import { useState } from "react";
 
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
   const { user, isLoaded } = useUser();
 
-  if (!isLoaded) return <div />;
+  const [input, setInput] = useState("");
+
+  const ctx = api.useContext();
+  const { mutate, isLoading: isPosting } = api.post.create.useMutation({
+    onSuccess: () => {
+      setInput("");
+      void ctx.post.getAll.invalidate();
+    },
+  });
 
   console.log(user);
   if (!user) return null;
+  if (!isLoaded) return <div />;
 
   return (
     <div className="flex w-full gap-3">
       <input
         placeholder="type some emoji"
         className="grow bg-transparent outline-none"
+        type="text"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        disabled={isPosting}
       />
+      <button onClick={() => mutate({ content: input })}>Post</button>
     </div>
   );
 };
@@ -52,7 +67,7 @@ const PostView = (props: PostWithUser) => {
           <span>{`@${author.username}`}</span>&nbsp;·&nbsp;
           <span className="font-thin">{dayjs(post.createdAt).fromNow()}</span>
         </div>
-        <span>{post.content}</span>
+        <span className="text-2xl">{post.content}</span>
       </div>
     </div>
   );
@@ -61,7 +76,7 @@ const PostView = (props: PostWithUser) => {
 const Feed = () => {
   const { data, isLoading } = api.post.getAll.useQuery();
   if (isLoading) return <LoadingPage />;
-  if(!data) return <div>Something went wrong</div>
+  if (!data) return <div>Something went wrong</div>;
   return (
     <div className="flex w-full flex-col border-x md:max-w-2xl">
       {[...data]?.map((fullPost) => (
@@ -89,7 +104,7 @@ export default function Home() {
         </div>
       </header>
       <main className="flex h-screen justify-center">
-        <Feed/>
+        <Feed />
       </main>
     </>
   );
