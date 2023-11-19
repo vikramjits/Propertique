@@ -3,17 +3,20 @@ import Head from "next/head";
 import { Image } from "next/dist/client/image-component";
 import { UserButton } from "@clerk/nextjs";
 
-import {  api } from "~/utils/api";
+import { api } from "~/utils/api";
 
 import type { RouterOutputs } from "~/utils/api";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { LoadingPage } from "~/components/loading";
 
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
+
+  if (!isLoaded) return <div />;
 
   console.log(user);
   if (!user) return null;
@@ -36,10 +39,18 @@ const PostView = (props: PostWithUser) => {
   const { post, author } = props;
   return (
     <div className="flex gap-3 border-b border-slate-400 p-4">
-      <Image src={author.profileImageUrl} width="56" height="56" className="h-14 w-14 rounded-full" alt="" placeholder="empty"/>
+      <Image
+        src={author.profileImageUrl}
+        width="56"
+        height="56"
+        className="h-14 w-14 rounded-full"
+        alt=""
+        placeholder="empty"
+      />
       <div className="flex flex-col">
         <div className="flex text-slate-300">
-          <span>{`@${author.username}`}</span>&nbsp;·&nbsp;<span className="font-thin">{dayjs(post.createdAt).fromNow()}</span>
+          <span>{`@${author.username}`}</span>&nbsp;·&nbsp;
+          <span className="font-thin">{dayjs(post.createdAt).fromNow()}</span>
         </div>
         <span>{post.content}</span>
       </div>
@@ -47,12 +58,21 @@ const PostView = (props: PostWithUser) => {
   );
 };
 
-export default function Home() {
+const Feed = () => {
   const { data, isLoading } = api.post.getAll.useQuery();
+  if (isLoading) return <LoadingPage />;
+  if(!data) return <div>Something went wrong</div>
+  return (
+    <div className="flex w-full flex-col border-x md:max-w-2xl">
+      {[...data]?.map((fullPost) => (
+        <PostView {...fullPost} key={fullPost.post.id} />
+      ))}
+    </div>
+  );
+};
 
-  if (isLoading) return <div>Loading...</div>;
-  if (!data) return <div>Something went wrong</div>;
-
+export default function Home() {
+  api.post.getAll.useQuery();
   return (
     <>
       <Head>
@@ -69,11 +89,7 @@ export default function Home() {
         </div>
       </header>
       <main className="flex h-screen justify-center">
-        <div className="flex w-full flex-col border-x md:max-w-2xl">
-          {[...data]?.map((fullPost) => (
-            <PostView {...fullPost} key={fullPost.post.id} />
-          ))}
-        </div>
+        <Feed/>
       </main>
     </>
   );
