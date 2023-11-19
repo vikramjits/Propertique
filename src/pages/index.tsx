@@ -12,6 +12,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import LoadingSpinner, { LoadingPage } from "~/components/loading";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import Link from "next/link";
 
 dayjs.extend(relativeTime);
 
@@ -83,8 +84,13 @@ const PostView = (props: PostWithUser) => {
       />
       <div className="flex flex-col">
         <div className="flex text-slate-300">
-          <span>{`@${author.username ?? author.firstName}`}</span>&nbsp;·&nbsp;
-          <span className="font-thin">{dayjs(post.createdAt).fromNow()}</span>
+          <Link href={`/@${author.username ?? author.firstName}`}>
+            <span>{`@${author.username ?? author.firstName}`}</span>
+            &nbsp;·&nbsp;
+          </Link>
+          <Link href={`/post/${post.id}`}>
+            <span className="font-thin">{dayjs(post.createdAt).fromNow()}</span>
+          </Link>
         </div>
         <span className="text-2xl">{post.content}</span>
       </div>
