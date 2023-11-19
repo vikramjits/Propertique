@@ -11,10 +11,13 @@ import {
 } from "~/server/api/trpc";
 
 const filterUserForClient = (user: User) => {
+console.log("users", user);
+
   return {
     id: user.id,
     username: user.username,
     profileImageUrl: user.imageUrl,
+    firstName: user.firstName,
   };
 };
 
@@ -45,18 +48,12 @@ export const postRouter = createTRPCRouter({
       // simulate a slow db call
       //await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // return ctx.db.post.create({
-      //   data: {
-      //     content: input.content,
-      //   },
-      // });
-
       const authorId = ctx.userId;
 
       const {success} = await ratelimit.limit(authorId);
 
       if(!success) throw new TRPCError({code: "TOO_MANY_REQUESTS"});
-      
+
       const post = await ctx.db.post.create({
         data: {
           authorId,
@@ -84,15 +81,19 @@ export const postRouter = createTRPCRouter({
         limit: 100,
       })
     ).map(filterUserForClient);
-
     return posts.map((post) => {
       const author = users.find((user) => user.id === post.authorId);
 
-      if (!author?.username)
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Author for post not found!",
-        });
+        if(!author?.username){
+          if(!author?.firstName){
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Author for post not found!",
+            });
+          }
+        }
+      //if (!author?.username)
+       
 
       return {
         post,
