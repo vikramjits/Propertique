@@ -11,7 +11,6 @@ import {
 } from "~/server/api/trpc";
 
 const filterUserForClient = (user: User) => {
-console.log("users", user);
 
   return {
     id: user.id,
@@ -43,7 +42,7 @@ export const postRouter = createTRPCRouter({
     }),
 
   create: privateProcedure
-    .input(z.object({ content: z.string().min(1).max(280) }))
+    .input(z.object({ content: z.string().emoji("Only emoji is allowed!").min(1).max(280) }))
     .mutation(async ({ ctx, input }) => {
       // simulate a slow db call
       //await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -92,7 +91,6 @@ export const postRouter = createTRPCRouter({
             });
           }
         }
-      //if (!author?.username)
        
 
       return {
