@@ -14,9 +14,8 @@ export default function SinglePostPage() {
   return (
     <>
       <Head>
-        <title>Propertique</title>
-        <meta name="description" content="Propertique" />
-        <link rel="icon" href="/favicon.ico" />
+        <title>Post</title>
+       
       </Head>
       
       <main className="flex h-screen justify-center">

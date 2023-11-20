@@ -1,5 +1,4 @@
 import { useUser } from "@clerk/nextjs";
-import Head from "next/head";
 import { Image } from "next/dist/client/image-component";
 import { UserButton } from "@clerk/nextjs";
 
@@ -84,7 +83,7 @@ const PostView = (props: PostWithUser) => {
       />
       <div className="flex flex-col">
         <div className="flex text-slate-300">
-          <Link href={`/@${author.username ?? author.firstName}`}>
+          <Link href={`/@${author.username ?? author.emailAddress}`}>
             <span>{`@${author.username ?? author.firstName}`}</span>
             &nbsp;·&nbsp;
           </Link>
@@ -103,7 +102,7 @@ const Feed = () => {
   if (isLoading) return <LoadingPage />;
   if (!data) return <div>Something went wrong</div>;
   return (
-    <div className="flex w-full flex-col border-x md:max-w-2xl">
+    <div className="flex w-full max-h-fit flex-col border-x  md:max-w-2xl">
       {[...data]?.map((fullPost) => (
         <PostView {...fullPost} key={fullPost.post.id} />
       ))}
@@ -115,11 +114,6 @@ export default function Home() {
   api.post.getAll.useQuery();
   return (
     <>
-      <Head>
-        <title>Propertique</title>
-        <meta name="description" content="Propertique" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
       <header className="flex justify-center">
         <div className="flex w-full gap-4 border-x border-b border-slate-400 p-4 md:max-w-2xl">
           <div>
@@ -128,7 +122,7 @@ export default function Home() {
           <CreatePostWizard />
         </div>
       </header>
-      <main className="flex h-screen justify-center">
+      <main className="flex h-fit justify-center overflow-y-auto">
         <Feed />
       </main>
     </>

@@ -5,4 +5,5 @@
 
 body{
     @apply bg-black text-slate-400 font-sans;
+    overscroll-behavior: none;
 }
