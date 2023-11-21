@@ -10,8 +10,26 @@ import { db } from "~/server/db";
 import SuperJSON from "superjson";
 import type { GetStaticProps, NextPage } from "next";
 import Image from "next/image";
+import { LoadingPage } from "~/components/loading";
+import PostView from "~/components/postview";
+import { PageLayout } from "~/components/layout";
 
 dayjs.extend(relativeTime);
+
+const ProfileFeed = (props: { userId: string }) => {
+  const { data, isLoading } = api.post.getPostById.useQuery({
+    id: props.userId,
+  });
+  if (isLoading) return <LoadingPage />;
+  if (!data || data.length === 0) return <div>user has not posted</div>;
+  return (
+    <div className="flex flex-col">
+    {data.map((fullPost) => (
+      <PostView {...fullPost} key={fullPost.post.id} />
+    ))}
+  </div>
+  );
+};
 
 const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
   const { data } = api.profile.getUserByUsername.useQuery({
@@ -26,25 +44,25 @@ const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
         <title>{data.username ?? data.emailAddress}</title>
       </Head>
 
-      <main className="flex h-fit justify-center border-x">
-        <div className="flex h-screen w-full flex-col border-x  md:max-w-2xl">
-          <div></div>
-          <div className=" relative h-36 bg-slate-600">
-            <Image
-              src={data.profileImageUrl}
-              alt={`${data.username ?? data.emailAddress}'s profile pic`}
-              width={128}
-              height={128}
-              className="absolute bottom-0 left-0 -mb-[64px] ml-4 rounded-full border-4 border-black"
-            />
-          </div>
-          <div className="h-[64px]"></div>
-          <div className="p-4 text-2xl font-bold">
-            {data.username ?? data.emailAddress}
-          </div>
-          <div className="border-b border-slate-400"></div>
+      <PageLayout>
+        <div className="relative h-36 bg-slate-600">
+          <Image
+            src={data.profileImageUrl}
+            alt={`${
+              data.username ?? data.emailAddress ?? "unknown"
+            }'s profile pic`}
+            width={128}
+            height={128}
+            className="absolute bottom-0 left-0 -mb-[64px] ml-4 rounded-full border-4 border-black bg-black"
+          />
         </div>
-      </main>
+        <div className="h-[64px]"></div>
+        <div className="p-4 text-2xl font-bold">{`@${
+          data.username ?? data.emailAddress ?? "unknown"
+        }`}</div>
+        <div className="w-full border-b border-slate-400" />
+        <ProfileFeed userId={data.id} />
+      </PageLayout>
     </>
   );
 };
